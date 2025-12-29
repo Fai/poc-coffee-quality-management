@@ -1,0 +1,155 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Coffee Quality Management - SageMaker Endpoint for Defect Detection'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment environment
+
+  ModelDataUrl:
+    Type: String
+    Description: S3 URL for the trained model artifacts (model.tar.gz)
+
+  InstanceType:
+    Type: String
+    Default: ml.m5.large
+    AllowedValues:
+      - ml.t2.medium
+      - ml.m5.large
+      - ml.m5.xlarge
+      - ml.p3.2xlarge
+    Description: SageMaker endpoint instance type
+
+  InitialInstanceCount:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    MaxValue: 10
+    Description: Initial number of instances
+
+Resources:
+  # IAM Role for SageMaker
+  SageMakerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'coffee-qm-sagemaker-role-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sagemaker.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+      Policies:
+        - PolicyName: S3ModelAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub 'arn:aws:s3:::coffee-qm-models-${Environment}-${AWS::AccountId}'
+                  - !Sub 'arn:aws:s3:::coffee-qm-models-${Environment}-${AWS::AccountId}/*'
+
+  # SageMaker Model
+  DefectDetectionModel:
+    Type: AWS::SageMaker::Model
+    Properties:
+      ModelName: !Sub 'coffee-defect-detection-model-${Environment}'
+      ExecutionRoleArn: !GetAtt SageMakerExecutionRole.Arn
+      PrimaryContainer:
+        # Using PyTorch inference container for object detection
+        Image: !Sub '763104351884.dkr.ecr.${AWS::Region}.amazonaws.com/pytorch-inference:2.0.1-cpu-py310'
+        ModelDataUrl: !Ref ModelDataUrl
+        Environment:
+          SAGEMAKER_PROGRAM: inference.py
+          SAGEMAKER_SUBMIT_DIRECTORY: /opt/ml/model/code
+      Tags:
+        - Key: Project
+          Value: CoffeeQualityManagement
+        - Key: Component
+          Value: AIDefectDetection
+
+  # SageMaker Endpoint Configuration
+  EndpointConfig:
+    Type: AWS::SageMaker::EndpointConfig
+    Properties:
+      EndpointConfigName: !Sub 'coffee-defect-detection-config-${Environment}'
+      ProductionVariants:
+        - VariantName: AllTraffic
+          ModelName: !GetAtt DefectDetectionModel.ModelName
+          InitialInstanceCount: !Ref InitialInstanceCount
+          InstanceType: !Ref InstanceType
+          InitialVariantWeight: 1.0
+      Tags:
+        - Key: Project
+          Value: CoffeeQualityManagement
+
+  # SageMaker Endpoint
+  DefectDetectionEndpoint:
+    Type: AWS::SageMaker::Endpoint
+    Properties:
+      EndpointName: !Sub 'coffee-defect-detection-${Environment}'
+      EndpointConfigName: !GetAtt EndpointConfig.EndpointConfigName
+      Tags:
+        - Key: Project
+          Value: CoffeeQualityManagement
+        - Key: Component
+          Value: AIDefectDetection
+
+  # Auto-scaling for production
+  ScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Condition: IsProduction
+    Properties:
+      MaxCapacity: 10
+      MinCapacity: 1
+      ResourceId: !Sub 'endpoint/${DefectDetectionEndpoint.EndpointName}/variant/AllTraffic'
+      RoleARN: !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/sagemaker.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_SageMakerEndpoint'
+      ScalableDimension: sagemaker:variant:DesiredInstanceCount
+      ServiceNamespace: sagemaker
+
+  ScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Condition: IsProduction
+    Properties:
+      PolicyName: !Sub 'coffee-defect-detection-scaling-${Environment}'
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ScalingTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 70.0
+        PredefinedMetricSpecification:
+          PredefinedMetricType: SageMakerVariantInvocationsPerInstance
+        ScaleInCooldown: 300
+        ScaleOutCooldown: 60
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, 'prod']
+
+Outputs:
+  EndpointName:
+    Description: SageMaker endpoint name
+    Value: !GetAtt DefectDetectionEndpoint.EndpointName
+    Export:
+      Name: !Sub 'CoffeeQM-AI-EndpointName-${Environment}'
+
+  EndpointArn:
+    Description: SageMaker endpoint ARN
+    Value: !Ref DefectDetectionEndpoint
+    Export:
+      Name: !Sub 'CoffeeQM-AI-EndpointArn-${Environment}'
+
+  ModelName:
+    Description: SageMaker model name
+    Value: !GetAtt DefectDetectionModel.ModelName
+    Export:
+      Name: !Sub 'CoffeeQM-AI-ModelName-${Environment}'

@@ -1,0 +1,34 @@
+# Production configuration for Coffee Quality Management Platform
+# All sensitive values should be provided via environment variables
+
+[server]
+port = 8080
+host = "0.0.0.0"
+
+[database]
+# Set via CQM__DATABASE__URL environment variable
+max_connections = 20
+min_connections = 5
+
+[jwt]
+# Set via CQM__JWT__SECRET environment variable
+access_token_expiry = 1800      # 30 minutes
+refresh_token_expiry = 604800   # 7 days
+
+[line]
+# Set via environment variables:
+# CQM__LINE__CHANNEL_ID
+# CQM__LINE__CHANNEL_SECRET
+# CQM__LINE__MESSAGING_TOKEN
+
+[aws]
+region = "ap-southeast-1"
+# Set via environment variables:
+# CQM__AWS__S3_BUCKET
+# CQM__AWS__AI_DETECTION_ENDPOINT
+# CQM__AWS__AI_DETECTION_API_KEY
+
+[weather]
+# Set via environment variables:
+# CQM__WEATHER__API_ENDPOINT
+# CQM__WEATHER__API_KEY

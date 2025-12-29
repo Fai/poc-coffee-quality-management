@@ -1,0 +1,248 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Coffee Quality Management - AI Defect Detection Microservice'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment environment
+
+  ModelDataUrl:
+    Type: String
+    Description: S3 URL for the trained model artifacts
+    Default: ''
+
+Resources:
+  # S3 Bucket for images and model artifacts
+  ImagesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'coffee-qm-images-${Environment}-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldUploads
+            Status: Enabled
+            Prefix: uploads/
+            ExpirationInDays: 30
+          - Id: DeleteOldAnnotated
+            Status: Enabled
+            Prefix: annotated/
+            ExpirationInDays: 90
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+              - POST
+              - GET
+            AllowedOrigins:
+              - '*'
+            MaxAge: 3000
+      Tags:
+        - Key: Project
+          Value: CoffeeQualityManagement
+        - Key: Component
+          Value: AIDefectDetection
+
+  # IAM Role for Lambda
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'coffee-qm-ai-lambda-role-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                Resource: !Sub '${ImagesBucket.Arn}/*'
+        - PolicyName: SageMakerInvoke
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sagemaker:InvokeEndpoint
+                Resource: !Sub 'arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/coffee-defect-detection-${Environment}'
+
+  # Lambda Function for defect detection
+  DefectDetectionFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'coffee-qm-defect-detection-${Environment}'
+      Runtime: python3.11
+      Handler: lambda_handler.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      MemorySize: 512
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+          BUCKET_NAME: !Ref ImagesBucket
+          SAGEMAKER_ENDPOINT: !Sub 'coffee-defect-detection-${Environment}'
+      Code:
+        ZipFile: |
+          # Placeholder - actual code in lambda_handler.py
+          def handler(event, context):
+              return {'statusCode': 200, 'body': 'Placeholder'}
+      Tags:
+        - Key: Project
+          Value: CoffeeQualityManagement
+        - Key: Component
+          Value: AIDefectDetection
+
+  # API Gateway REST API
+  DefectDetectionApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub 'coffee-qm-defect-detection-api-${Environment}'
+      Description: API for coffee bean defect detection
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      Tags:
+        - Key: Project
+          Value: CoffeeQualityManagement
+
+  # API Gateway Resource
+  DetectResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref DefectDetectionApi
+      ParentId: !GetAtt DefectDetectionApi.RootResourceId
+      PathPart: detect
+
+  # API Gateway Method
+  DetectMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref DefectDetectionApi
+      ResourceId: !Ref DetectResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DefectDetectionFunction.Arn}/invocations'
+
+  # Lambda Permission for API Gateway
+  LambdaApiGatewayPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref DefectDetectionFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${DefectDetectionApi}/*'
+
+  # API Gateway Deployment
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: DetectMethod
+    Properties:
+      RestApiId: !Ref DefectDetectionApi
+
+  # API Gateway Stage
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref DefectDetectionApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: !Ref Environment
+      Tags:
+        - Key: Project
+          Value: CoffeeQualityManagement
+
+  # API Key
+  ApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    DependsOn: ApiStage
+    Properties:
+      Name: !Sub 'coffee-qm-defect-detection-key-${Environment}'
+      Enabled: true
+      StageKeys:
+        - RestApiId: !Ref DefectDetectionApi
+          StageName: !Ref Environment
+
+  # Usage Plan
+  UsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    DependsOn: ApiStage
+    Properties:
+      UsagePlanName: !Sub 'coffee-qm-defect-detection-plan-${Environment}'
+      ApiStages:
+        - ApiId: !Ref DefectDetectionApi
+          Stage: !Ref Environment
+      Throttle:
+        BurstLimit: 100
+        RateLimit: 50
+      Quota:
+        Limit: 10000
+        Period: MONTH
+
+  # Usage Plan Key
+  UsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref ApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref UsagePlan
+
+  # CloudWatch Log Group
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/coffee-qm-defect-detection-${Environment}'
+      RetentionInDays: 30
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${DefectDetectionApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/detect'
+    Export:
+      Name: !Sub 'CoffeeQM-AI-ApiEndpoint-${Environment}'
+
+  ImagesBucketName:
+    Description: S3 bucket for images
+    Value: !Ref ImagesBucket
+    Export:
+      Name: !Sub 'CoffeeQM-AI-ImagesBucket-${Environment}'
+
+  ApiKeyId:
+    Description: API Key ID (retrieve value from console)
+    Value: !Ref ApiKey
+    Export:
+      Name: !Sub 'CoffeeQM-AI-ApiKeyId-${Environment}'
+
+  LambdaFunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt DefectDetectionFunction.Arn
+    Export:
+      Name: !Sub 'CoffeeQM-AI-LambdaArn-${Environment}'

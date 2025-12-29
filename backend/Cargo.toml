@@ -1,0 +1,44 @@
+[package]
+name = "coffee-quality-management-backend"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "cqm-server"
+path = "src/main.rs"
+
+[dependencies]
+# Workspace dependencies
+shared.workspace = true
+tokio.workspace = true
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+sqlx.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+jsonwebtoken.workspace = true
+bcrypt.workspace = true
+reqwest.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+rust_decimal.workspace = true
+config.workspace = true
+dotenvy.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+validator.workspace = true
+
+# Additional backend-specific dependencies
+axum-extra = { version = "0.9", features = ["typed-header"] }
+hmac.workspace = true
+sha2.workspace = true
+base64.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+tokio-test = "0.4"

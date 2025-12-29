@@ -1,0 +1,30 @@
+# Development configuration for Coffee Quality Management Platform
+
+[server]
+port = 3000
+host = "0.0.0.0"
+
+[database]
+url = "postgres://postgres:postgres@localhost:5432/coffee_qm_dev"
+max_connections = 10
+min_connections = 2
+
+[jwt]
+secret = "dev-secret-change-in-production"
+access_token_expiry = 3600      # 1 hour
+refresh_token_expiry = 604800   # 7 days
+
+[line]
+channel_id = ""
+channel_secret = ""
+messaging_token = ""
+
+[aws]
+region = "ap-southeast-1"
+s3_bucket = "coffee-qm-dev"
+ai_detection_endpoint = ""
+ai_detection_api_key = ""
+
+[weather]
+api_endpoint = ""
+api_key = ""

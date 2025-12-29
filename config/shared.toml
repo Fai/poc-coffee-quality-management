@@ -1,0 +1,19 @@
+[database]
+host = "${SHARED_RDS_ENDPOINT}"
+port = 5432
+database = "cqm_dev"
+user = "cqm_user"
+password = "${PROJECT_DB_PASSWORD}"
+
+[redis]
+host = "${SHARED_REDIS_ENDPOINT}"
+port = 6379
+prefix = "cqm:"
+
+[s3]
+bucket = "${SHARED_S3_BUCKET}"
+prefix = "cqm/"
+
+[dynamodb]
+table = "${SHARED_DYNAMODB_TABLE}"
+project_id = "cqm"

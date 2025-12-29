@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  cqm-app:
+    build: .
+    container_name: cqm-shared
+    environment:
+      - CONFIG_ENV=shared
+      - PROJECT_NAME=cqm
+      - PROJECT_PREFIX=cqm
+      - SHARED_RDS_ENDPOINT=host.docker.internal
+      - SHARED_REDIS_ENDPOINT=host.docker.internal
+      - SHARED_S3_BUCKET=local-shared-bucket
+      - SHARED_DYNAMODB_TABLE=local-shared-metadata
+      - PROJECT_DB_PASSWORD=poc_password
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    depends_on:
+      - shared-postgres
+      - shared-redis
+
+  # Local shared services for development
+  shared-postgres:
+    image: postgres:15-alpine
+    container_name: shared-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - shared_postgres_data:/var/lib/postgresql/data
+    command: >
+      bash -c "
+        docker-entrypoint.sh postgres &
+        sleep 10 &&
+        psql -U postgres -c 'CREATE DATABASE IF NOT EXISTS cqm_dev;' &&
+        psql -U postgres -c 'CREATE USER IF NOT EXISTS cqm_user WITH PASSWORD '\''poc_password'\'';' &&
+        psql -U postgres -c 'GRANT ALL PRIVILEGES ON DATABASE cqm_dev TO cqm_user;' &&
+        wait
+      "
+
+  shared-redis:
+    image: redis:7-alpine
+    container_name: shared-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - shared_redis_data:/data
+
+volumes:
+  shared_postgres_data:
+  shared_redis_data:
