@@ -1,0 +1,979 @@
+{
+ "Resources": {
+  "ImagesBucket1E86AFB2": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "GET",
+        "PUT",
+        "POST"
+       ],
+       "AllowedOrigins": [
+        "*"
+       ]
+      }
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     },
+     {
+      "Key": "Environment",
+      "Value": "test"
+     },
+     {
+      "Key": "Project",
+      "Value": "CoffeeQualityManagement"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/ImagesBucket/Resource"
+   }
+  },
+  "ImagesBucketPolicy5ED12B6C": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "ImagesBucket1E86AFB2"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ImagesBucket1E86AFB2",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ImagesBucket1E86AFB2",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/ImagesBucket/Policy/Resource"
+   }
+  },
+  "ImagesBucketAutoDeleteObjectsCustomResource1A749259": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "ImagesBucket1E86AFB2"
+    }
+   },
+   "DependsOn": [
+    "ImagesBucketPolicy5ED12B6C"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/ImagesBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-215665150081-ap-southeast-1",
+     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "ImagesBucket1E86AFB2"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+    "aws:asset:property": "Code"
+   }
+  },
+  "FrontendBucketEFE2E19C": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "IgnorePublicAcls": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     },
+     {
+      "Key": "Environment",
+      "Value": "test"
+     },
+     {
+      "Key": "Project",
+      "Value": "CoffeeQualityManagement"
+     }
+    ],
+    "WebsiteConfiguration": {
+     "ErrorDocument": "index.html",
+     "IndexDocument": "index.html"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/FrontendBucket/Resource"
+   }
+  },
+  "FrontendBucketPolicy1DFF75D9": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "FrontendBucketEFE2E19C"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "FrontendBucketEFE2E19C",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "FrontendBucketEFE2E19C",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "FrontendBucketEFE2E19C",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/FrontendBucket/Policy/Resource"
+   }
+  },
+  "FrontendBucketAutoDeleteObjectsCustomResourceDB860B32": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "FrontendBucketEFE2E19C"
+    }
+   },
+   "DependsOn": [
+    "FrontendBucketPolicy1DFF75D9"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/FrontendBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "AIRepo4D2E9FDE": {
+   "Type": "AWS::ECR::Repository",
+   "Properties": {
+    "EmptyOnDelete": true,
+    "RepositoryName": "coffee-qm-ai",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "test"
+     },
+     {
+      "Key": "Project",
+      "Value": "CoffeeQualityManagement"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIRepo/Resource"
+   }
+  },
+  "AIBuildProjectRoleB807A93D": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "codebuild.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "test"
+     },
+     {
+      "Key": "Project",
+      "Value": "CoffeeQualityManagement"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIBuildProject/Role/Resource"
+   }
+  },
+  "AIBuildProjectRoleDefaultPolicy1B15824B": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":logs:ap-southeast-1:215665150081:log-group:/aws/codebuild/",
+           {
+            "Ref": "AIBuildProject41900C14"
+           }
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":logs:ap-southeast-1:215665150081:log-group:/aws/codebuild/",
+           {
+            "Ref": "AIBuildProject41900C14"
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "codebuild:CreateReportGroup",
+        "codebuild:CreateReport",
+        "codebuild:UpdateReport",
+        "codebuild:BatchPutTestCases",
+        "codebuild:BatchPutCodeCoverages"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":codebuild:ap-southeast-1:215665150081:report-group/",
+          {
+           "Ref": "AIBuildProject41900C14"
+          },
+          "-*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage",
+        "ecr:CompleteLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "AIRepo4D2E9FDE",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "AIBuildProjectRoleDefaultPolicy1B15824B",
+    "Roles": [
+     {
+      "Ref": "AIBuildProjectRoleB807A93D"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIBuildProject/Role/DefaultPolicy/Resource"
+   }
+  },
+  "AIBuildProject41900C14": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "NO_ARTIFACTS"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "EncryptionKey": "alias/aws/s3",
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_MEDIUM",
+     "EnvironmentVariables": [
+      {
+       "Name": "ECR_REPO_URI",
+       "Type": "PLAINTEXT",
+       "Value": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::Select": [
+            4,
+            {
+             "Fn::Split": [
+              ":",
+              {
+               "Fn::GetAtt": [
+                "AIRepo4D2E9FDE",
+                "Arn"
+               ]
+              }
+             ]
+            }
+           ]
+          },
+          ".dkr.ecr.",
+          {
+           "Fn::Select": [
+            3,
+            {
+             "Fn::Split": [
+              ":",
+              {
+               "Fn::GetAtt": [
+                "AIRepo4D2E9FDE",
+                "Arn"
+               ]
+              }
+             ]
+            }
+           ]
+          },
+          ".",
+          {
+           "Ref": "AWS::URLSuffix"
+          },
+          "/",
+          {
+           "Ref": "AIRepo4D2E9FDE"
+          }
+         ]
+        ]
+       }
+      },
+      {
+       "Name": "AWS_ACCOUNT_ID",
+       "Type": "PLAINTEXT",
+       "Value": "215665150081"
+      },
+      {
+       "Name": "AWS_REGION",
+       "Type": "PLAINTEXT",
+       "Value": "ap-southeast-1"
+      },
+      {
+       "Name": "BUCKET_NAME",
+       "Type": "PLAINTEXT",
+       "Value": {
+        "Ref": "ImagesBucket1E86AFB2"
+       }
+      }
+     ],
+     "Image": "aws/codebuild/standard:7.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": true,
+     "Type": "LINUX_CONTAINER"
+    },
+    "Name": "coffee-qm-ai-build",
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "AIBuildProjectRoleB807A93D",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"pre_build\": {\n      \"commands\": [\n        \"aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cat > Dockerfile << 'EOF'\\nFROM public.ecr.aws/lambda/python:3.11\\nCOPY requirements.txt ${LAMBDA_TASK_ROOT}/\\nRUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements.txt\\nRUN python -c \\\"from transformers import pipeline; pipeline('image-classification', model='everycoffee/autotrain-coffee-bean-quality-97496146930')\\\"\\nCOPY lambda_handler.py ${LAMBDA_TASK_ROOT}/\\nCMD [\\\"lambda_handler.handler\\\"]\\nEOF\",\n        \"cat > requirements.txt << 'EOF'\\nboto3>=1.34.0\\ntransformers>=4.36.0\\ntorch>=2.1.0\\nPillow>=10.0.0\\nEOF\",\n        \"cat > lambda_handler.py << 'EOF'\\nimport json, boto3, base64, os, uuid\\nfrom datetime import datetime\\nfrom io import BytesIO\\ns3 = boto3.client(\\\"s3\\\")\\nBUCKET = os.environ.get(\\\"BUCKET_NAME\\\")\\nMODEL = \\\"everycoffee/autotrain-coffee-bean-quality-97496146930\\\"\\n_clf = None\\ndef get_clf():\\n    global _clf\\n    if _clf is None:\\n        from transformers import pipeline\\n        _clf = pipeline(\\\"image-classification\\\", model=MODEL)\\n    return _clf\\ndef handler(event, context):\\n    try:\\n        body = json.loads(event.get(\\\"body\\\", \\\"{}\\\"))\\n        img_b64 = body.get(\\\"image_base64\\\")\\n        if not img_b64:\\n            return {\\\"statusCode\\\": 400, \\\"headers\\\": {\\\"Content-Type\\\": \\\"application/json\\\", \\\"Access-Control-Allow-Origin\\\": \\\"*\\\"}, \\\"body\\\": json.dumps({\\\"error\\\": \\\"Missing image_base64\\\"})}\\n        rid = f\\\"det-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{str(uuid.uuid4())[:8]}\\\"\\n        t0 = datetime.utcnow()\\n        img_bytes = base64.b64decode(img_b64)\\n        key = f\\\"uploads/{rid}.jpg\\\"\\n        s3.put_object(Bucket=BUCKET, Key=key, Body=img_bytes, ContentType=\\\"image/jpeg\\\")\\n        from PIL import Image\\n        img = Image.open(BytesIO(img_bytes)).convert(\\\"RGB\\\")\\n        res = get_clf()(img)\\n        d_score = next((r[\\\"score\\\"] for r in res if r[\\\"label\\\"].lower() == \\\"defect\\\"), 0.0)\\n        g_score = next((r[\\\"score\\\"] for r in res if r[\\\"label\\\"].lower() != \\\"defect\\\"), 0.0)\\n        is_def = d_score > g_score\\n        ms = int((datetime.utcnow() - t0).total_seconds() * 1000)\\n        return {\\\"statusCode\\\": 200, \\\"headers\\\": {\\\"Content-Type\\\": \\\"application/json\\\", \\\"Access-Control-Allow-Origin\\\": \\\"*\\\"}, \\\"body\\\": json.dumps({\\\"request_id\\\": rid, \\\"detection\\\": {\\\"request_id\\\": rid, \\\"image_url\\\": f\\\"s3://{BUCKET}/{key}\\\", \\\"is_defective\\\": is_def, \\\"defect_probability\\\": d_score, \\\"confidence_score\\\": max(d_score, g_score), \\\"processing_time_ms\\\": ms, \\\"model\\\": MODEL, \\\"note\\\": \\\"Binary classification\\\"}, \\\"suggested_grade\\\": \\\"needs_inspection\\\" if is_def else \\\"likely_specialty\\\"})}\\n    except Exception as e:\\n        return {\\\"statusCode\\\": 500, \\\"headers\\\": {\\\"Content-Type\\\": \\\"application/json\\\", \\\"Access-Control-Allow-Origin\\\": \\\"*\\\"}, \\\"body\\\": json.dumps({\\\"error\\\": str(e)})}\\nEOF\",\n        \"docker build -t $ECR_REPO_URI:latest .\"\n      ]\n    },\n    \"post_build\": {\n      \"commands\": [\n        \"docker push $ECR_REPO_URI:latest\"\n      ]\n    }\n  }\n}",
+     "Type": "NO_SOURCE"
+    },
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "test"
+     },
+     {
+      "Key": "Project",
+      "Value": "CoffeeQualityManagement"
+     }
+    ],
+    "TimeoutInMinutes": 30
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIBuildProject/Resource"
+   }
+  },
+  "AIDetectLambdaServiceRole92EE047B": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "test"
+     },
+     {
+      "Key": "Project",
+      "Value": "CoffeeQualityManagement"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIDetectLambda/ServiceRole/Resource"
+   }
+  },
+  "AIDetectLambdaServiceRoleDefaultPolicy8AE5632F": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ImagesBucket1E86AFB2",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ImagesBucket1E86AFB2",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "AIDetectLambdaServiceRoleDefaultPolicy8AE5632F",
+    "Roles": [
+     {
+      "Ref": "AIDetectLambdaServiceRole92EE047B"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIDetectLambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "AIDetectLambda937CCEAF": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "ZipFile": "\nimport json, random\ndef handler(event, context):\n    is_def = random.random() > 0.5\n    return {\"statusCode\": 200, \"headers\": {\"Content-Type\": \"application/json\", \"Access-Control-Allow-Origin\": \"*\"}, \"body\": json.dumps({\"request_id\": \"placeholder\", \"detection\": {\"is_defective\": is_def, \"defect_probability\": 0.5, \"confidence_score\": 0.5, \"processing_time_ms\": 100, \"model\": \"placeholder\", \"note\": \"Run CodeBuild to deploy real model\"}, \"suggested_grade\": \"needs_inspection\" if is_def else \"likely_specialty\"})}\n"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": {
+       "Ref": "ImagesBucket1E86AFB2"
+      }
+     }
+    },
+    "FunctionName": "coffee-qm-ai-detect",
+    "Handler": "index.handler",
+    "MemorySize": 3008,
+    "Role": {
+     "Fn::GetAtt": [
+      "AIDetectLambdaServiceRole92EE047B",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Tags": [
+     {
+      "Key": "Environment",
+      "Value": "test"
+     },
+     {
+      "Key": "Project",
+      "Value": "CoffeeQualityManagement"
+     }
+    ],
+    "Timeout": 60
+   },
+   "DependsOn": [
+    "AIDetectLambdaServiceRoleDefaultPolicy8AE5632F",
+    "AIDetectLambdaServiceRole92EE047B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIDetectLambda/Resource"
+   }
+  },
+  "AIApi2A8B32A5": {
+   "Type": "AWS::ApiGatewayV2::Api",
+   "Properties": {
+    "CorsConfiguration": {
+     "AllowHeaders": [
+      "*"
+     ],
+     "AllowMethods": [
+      "POST",
+      "OPTIONS"
+     ],
+     "AllowOrigins": [
+      "*"
+     ]
+    },
+    "Name": "coffee-qm-ai-test",
+    "ProtocolType": "HTTP",
+    "Tags": {
+     "Environment": "test",
+     "Project": "CoffeeQualityManagement"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIApi/Resource"
+   }
+  },
+  "AIApiDefaultStage027FF7CE": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "ApiId": {
+     "Ref": "AIApi2A8B32A5"
+    },
+    "AutoDeploy": true,
+    "StageName": "$default",
+    "Tags": {
+     "Environment": "test",
+     "Project": "CoffeeQualityManagement"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIApi/DefaultStage/Resource"
+   }
+  },
+  "AIApiPOSTdetectAIIntegration57088B9C": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "AIApi2A8B32A5"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "AIDetectLambda937CCEAF",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIApi/POST--detect/AIIntegration/Resource"
+   }
+  },
+  "AIApiPOSTdetectAIIntegrationPermissionCB9253CE": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "AIDetectLambda937CCEAF",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-southeast-1:215665150081:",
+       {
+        "Ref": "AIApi2A8B32A5"
+       },
+       "/*/*/detect"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIApi/POST--detect/AIIntegration-Permission"
+   }
+  },
+  "AIApiPOSTdetectBB7DD3EF": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "AIApi2A8B32A5"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "POST /detect",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "AIApiPOSTdetectAIIntegration57088B9C"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/AIApi/POST--detect/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/12O3W7CMAyFn4X74LGiPQAgTdvVqvIAU0i9ytDGVeyAUJR3n9KOwXZ1vuO/4wqq9Qs8L+xFlq49LXs6QNqrdSdjL/KZZA1pG90J1ey+/A/NUnNP7novzz4bdAFSgyMLKYdp4O6ycdziIVLfQqoDH9FNl38wG7IDpIZ7nPaK3nNuCb0dDq2F9Bq9U2Jfeo9cYxhIhNhnY0fqrOLFXs8VpDfVcTNSGSpS7F5tN4XNUEoNR53p3St2wd4O/7PTXM5mF0V5aFA4Bjc//st/WnXgM7UYtlbQbERQSyj5zjwuf0Qdo2bjuUU4ytO5qqBawWpxFKJliF5pQGhm/QYyaLEBwQEAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "CoffeeQM-AI/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "FrontendURL": {
+   "Value": {
+    "Fn::GetAtt": [
+     "FrontendBucketEFE2E19C",
+     "WebsiteURL"
+    ]
+   }
+  },
+  "AIApiURL": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AIApi2A8B32A5",
+     "ApiEndpoint"
+    ]
+   }
+  },
+  "FrontendBucketName": {
+   "Value": {
+    "Ref": "FrontendBucketEFE2E19C"
+   }
+  },
+  "CodeBuildProject": {
+   "Value": {
+    "Ref": "AIBuildProject41900C14"
+   }
+  },
+  "ECRRepository": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      {
+       "Fn::Select": [
+        4,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "AIRepo4D2E9FDE",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".dkr.ecr.",
+      {
+       "Fn::Select": [
+        3,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "AIRepo4D2E9FDE",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "AIRepo4D2E9FDE"
+      }
+     ]
+    ]
+   }
+  },
+  "LambdaName": {
+   "Value": {
+    "Ref": "AIDetectLambda937CCEAF"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

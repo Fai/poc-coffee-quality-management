@@ -1,0 +1,20 @@
+{
+  "name": "coffee-qm-infrastructure",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "cdk": "cdk",
+    "deploy:test": "cdk deploy CoffeeQM-test --require-approval never",
+    "destroy:test": "cdk destroy CoffeeQM-test --force",
+    "diff": "cdk diff",
+    "costs": "aws ce get-cost-and-usage --time-period Start=$(date -v-30d +%Y-%m-%d),End=$(date +%Y-%m-%d) --granularity MONTHLY --filter '{\"Tags\":{\"Key\":\"Project\",\"Values\":[\"CoffeeQualityManagement\"]}}' --metrics UnblendedCost --group-by Type=DIMENSION,Key=SERVICE"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.120.0",
+    "constructs": "^10.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}

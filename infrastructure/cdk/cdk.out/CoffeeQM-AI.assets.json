@@ -1,0 +1,36 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6": {
+      "displayName": "CoffeeQM-AI/Custom::S3AutoDeleteObjectsCustomResourceProvider Code",
+      "source": {
+        "path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "215665150081-ap-southeast-1-a8d0be26": {
+          "bucketName": "cdk-hnb659fds-assets-215665150081-ap-southeast-1",
+          "objectKey": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip",
+          "region": "ap-southeast-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::215665150081:role/cdk-hnb659fds-file-publishing-role-215665150081-ap-southeast-1"
+        }
+      }
+    },
+    "a60291c35a40b9baf866af3a1fa6bc60458c27dda1d97095abde7c78800045ea": {
+      "displayName": "CoffeeQM-AI Template",
+      "source": {
+        "path": "CoffeeQM-AI.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "215665150081-ap-southeast-1-64a4ec84": {
+          "bucketName": "cdk-hnb659fds-assets-215665150081-ap-southeast-1",
+          "objectKey": "a60291c35a40b9baf866af3a1fa6bc60458c27dda1d97095abde7c78800045ea.json",
+          "region": "ap-southeast-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::215665150081:role/cdk-hnb659fds-file-publishing-role-215665150081-ap-southeast-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
