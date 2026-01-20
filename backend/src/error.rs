@@ -87,7 +87,9 @@ pub enum AppError {
 
     // Sync errors
     #[error("Sync conflict detected")]
-    SyncConflict,
+    SyncConflict {
+        conflict: crate::services::sync::SyncConflict,
+    },
 
     // Database errors
     #[error("Database error: {0}")]
@@ -290,7 +292,7 @@ impl IntoResponse for AppError {
                     field: None,
                 },
             ),
-            AppError::SyncConflict => (
+            AppError::SyncConflict { .. } => (
                 StatusCode::CONFLICT,
                 ErrorDetail {
                     code: "SYNC_CONFLICT".to_string(),

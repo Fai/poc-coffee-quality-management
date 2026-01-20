@@ -43,6 +43,10 @@ pub fn api_routes() -> Router<AppState> {
         .nest("/certifications", certification_routes())
         // Protected routes - notification management
         .nest("/notifications", notification_routes())
+        // Protected routes - sync (offline support)
+        .nest("/sync", sync_routes())
+        // Protected routes - reporting
+        .nest("/reports", reporting_routes())
 }
 
 /// Authentication routes (public)
@@ -284,5 +288,26 @@ fn notification_routes() -> Router<AppState> {
         .route("/triggers/all", post(handlers::run_all_triggers))
         // Queue processing
         .route("/queue/process", post(handlers::process_queue))
+        .route_layer(middleware::from_fn(auth_middleware))
+}
+
+
+/// Sync routes for offline support (protected)
+fn sync_routes() -> Router<AppState> {
+    Router::new()
+        .route("/changes", post(handlers::get_changes))
+        .route("/apply", post(handlers::apply_changes))
+        .route("/conflicts", get(handlers::get_conflicts))
+        .route("/conflicts/resolve", post(handlers::resolve_conflict))
+        .route_layer(middleware::from_fn(auth_middleware))
+}
+
+/// Reporting routes (protected)
+fn reporting_routes() -> Router<AppState> {
+    Router::new()
+        .route("/dashboard", get(handlers::get_dashboard))
+        .route("/harvest-yield", get(handlers::get_harvest_yield_report))
+        .route("/quality-trend", get(handlers::get_quality_trend_report))
+        .route("/processing-efficiency", get(handlers::get_processing_efficiency_report))
         .route_layer(middleware::from_fn(auth_middleware))
 }
