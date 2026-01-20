@@ -1,0 +1,100 @@
+{
+  "app": {
+    "name": "Coffee Quality Management",
+    "tagline": "From Farm to Cup"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "defect": "Defect Detection",
+    "plots": "Plots",
+    "lots": "Lots",
+    "quality": "Quality",
+    "inventory": "Inventory",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+  },
+  "dashboard": {
+    "title": "Overview",
+    "totalLots": "Total Lots",
+    "activeLots": "Active Lots",
+    "inventory": "Inventory",
+    "avgScore": "Avg Score",
+    "recentHarvests": "Recent Harvests",
+    "alerts": "Alerts",
+    "expiringCerts": "Expiring Certifications"
+  },
+  "plots": {
+    "title": "Plots",
+    "add": "Add Plot",
+    "name": "Plot Name",
+    "area": "Area (rai)",
+    "altitude": "Altitude (m)",
+    "variety": "Variety",
+    "shade": "Shade (%)"
+  },
+  "lots": {
+    "title": "Coffee Lots",
+    "add": "Create Lot",
+    "code": "Lot Code",
+    "stage": "Stage",
+    "weight": "Weight (kg)",
+    "stages": {
+      "cherry": "Cherry",
+      "parchment": "Parchment",
+      "green_bean": "Green Bean",
+      "roasted_bean": "Roasted Bean",
+      "sold": "Sold"
+    }
+  },
+  "quality": {
+    "title": "Quality",
+    "grading": "Grading",
+    "cupping": "Cupping",
+    "score": "Score",
+    "defects": "Defects",
+    "grade": "Grade"
+  },
+  "defect": {
+    "title": "AI Defect Detection",
+    "camera": "Take Photo",
+    "upload": "Upload",
+    "analyzing": "Analyzing...",
+    "result": "Detection Result",
+    "hasDefect": "Defect Found",
+    "noDefect": "No Defect",
+    "confidence": "Confidence",
+    "grade": "Suggested Grade",
+    "scanAnother": "Scan Another"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "balance": "Balance",
+    "transactions": "Transactions",
+    "alerts": "Alerts"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "noData": "No data",
+    "error": "Error",
+    "success": "Success",
+    "kg": "kg",
+    "offline": "Offline",
+    "syncing": "Syncing..."
+  }
+}

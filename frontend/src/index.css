@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Sarabun', sans-serif;
+  }
+  body {
+    @apply bg-coffee-50 text-coffee-900;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+  .btn-primary {
+    @apply bg-coffee-600 text-white hover:bg-coffee-700;
+  }
+  .btn-secondary {
+    @apply bg-coffee-100 text-coffee-700 hover:bg-coffee-200;
+  }
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-coffee-100 p-4;
+  }
+  .input {
+    @apply w-full px-3 py-2 border border-coffee-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-coffee-500 focus:border-transparent;
+  }
+  .label {
+    @apply block text-sm font-medium text-coffee-700 mb-1;
+  }
+}

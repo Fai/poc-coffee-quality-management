@@ -1,0 +1,100 @@
+{
+  "app": {
+    "name": "ระบบจัดการคุณภาพกาแฟ",
+    "tagline": "จากไร่สู่ถ้วย"
+  },
+  "nav": {
+    "dashboard": "แดชบอร์ด",
+    "defect": "ตรวจข้อบกพร่อง",
+    "plots": "แปลงปลูก",
+    "lots": "ล็อตกาแฟ",
+    "quality": "คุณภาพ",
+    "inventory": "สินค้าคงคลัง",
+    "settings": "ตั้งค่า",
+    "logout": "ออกจากระบบ"
+  },
+  "auth": {
+    "login": "เข้าสู่ระบบ",
+    "register": "ลงทะเบียน",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "forgotPassword": "ลืมรหัสผ่าน?",
+    "noAccount": "ยังไม่มีบัญชี?",
+    "hasAccount": "มีบัญชีแล้ว?"
+  },
+  "dashboard": {
+    "title": "ภาพรวม",
+    "totalLots": "ล็อตทั้งหมด",
+    "activeLots": "ล็อตที่ใช้งาน",
+    "inventory": "สินค้าคงคลัง",
+    "avgScore": "คะแนนเฉลี่ย",
+    "recentHarvests": "เก็บเกี่ยวล่าสุด",
+    "alerts": "การแจ้งเตือน",
+    "expiringCerts": "ใบรับรองใกล้หมดอายุ"
+  },
+  "plots": {
+    "title": "แปลงปลูก",
+    "add": "เพิ่มแปลง",
+    "name": "ชื่อแปลง",
+    "area": "พื้นที่ (ไร่)",
+    "altitude": "ความสูง (ม.)",
+    "variety": "พันธุ์",
+    "shade": "ร่มเงา (%)"
+  },
+  "lots": {
+    "title": "ล็อตกาแฟ",
+    "add": "สร้างล็อต",
+    "code": "รหัสล็อต",
+    "stage": "สถานะ",
+    "weight": "น้ำหนัก (กก.)",
+    "stages": {
+      "cherry": "เชอร์รี่",
+      "parchment": "กะลา",
+      "green_bean": "สารกาแฟ",
+      "roasted_bean": "เมล็ดคั่ว",
+      "sold": "ขายแล้ว"
+    }
+  },
+  "quality": {
+    "title": "คุณภาพ",
+    "grading": "การเกรด",
+    "cupping": "การคัปปิ้ง",
+    "score": "คะแนน",
+    "defects": "ข้อบกพร่อง",
+    "grade": "เกรด"
+  },
+  "defect": {
+    "title": "ตรวจข้อบกพร่อง AI",
+    "camera": "ถ่ายรูป",
+    "upload": "อัปโหลด",
+    "analyzing": "กำลังวิเคราะห์...",
+    "result": "ผลการตรวจ",
+    "hasDefect": "พบข้อบกพร่อง",
+    "noDefect": "ไม่พบข้อบกพร่อง",
+    "confidence": "ความมั่นใจ",
+    "grade": "เกรดแนะนำ",
+    "scanAnother": "สแกนใหม่"
+  },
+  "inventory": {
+    "title": "สินค้าคงคลัง",
+    "balance": "ยอดคงเหลือ",
+    "transactions": "รายการเคลื่อนไหว",
+    "alerts": "การแจ้งเตือน"
+  },
+  "common": {
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "delete": "ลบ",
+    "edit": "แก้ไข",
+    "view": "ดู",
+    "search": "ค้นหา",
+    "filter": "กรอง",
+    "loading": "กำลังโหลด...",
+    "noData": "ไม่มีข้อมูล",
+    "error": "เกิดข้อผิดพลาด",
+    "success": "สำเร็จ",
+    "kg": "กก.",
+    "offline": "ออฟไลน์",
+    "syncing": "กำลังซิงค์..."
+  }
+}
