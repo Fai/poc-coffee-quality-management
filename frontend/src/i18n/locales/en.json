@@ -68,12 +68,17 @@
     "camera": "Take Photo",
     "upload": "Upload",
     "analyzing": "Analyzing...",
+    "coldStart": "Starting AI system, please wait...",
+    "retrying": "Retrying (attempt {{attempt}})...",
+    "pleaseWait": "First request may take 30-60 seconds",
     "result": "Detection Result",
     "hasDefect": "Defect Found",
     "noDefect": "No Defect",
     "confidence": "Confidence",
     "grade": "Suggested Grade",
-    "scanAnother": "Scan Another"
+    "scanAnother": "Scan Another",
+    "tryAgain": "Try Again",
+    "processTime": "Process time"
   },
   "inventory": {
     "title": "Inventory",

@@ -40,14 +40,21 @@ phases:
       - echo Creating Dockerfile...
       - |
         cat > Dockerfile << 'DEOF'
-        FROM python:3.11-slim as builder
-        RUN pip install --no-cache-dir boto3 transformers torch --extra-index-url https://download.pytorch.org/whl/cpu
-        RUN pip install --no-cache-dir Pillow
+        FROM public.ecr.aws/lambda/python:3.11
+        
+        # Install build dependencies
+        RUN yum install -y gcc gcc-c++ && yum clean all
+        
+        # Install Python packages with pinned versions
+        RUN pip install --upgrade pip setuptools wheel
+        RUN pip install --no-cache-dir boto3==1.34.0 Pillow==10.2.0
+        RUN pip install --no-cache-dir numpy==1.26.4
+        RUN pip install --no-cache-dir torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu
+        RUN pip install --no-cache-dir transformers==4.36.2 huggingface_hub==0.20.3
+        
+        # Pre-download model
         RUN python -c "from transformers import pipeline; pipeline('image-classification', model='everycoffee/autotrain-coffee-bean-quality-97496146930')"
         
-        FROM public.ecr.aws/lambda/python:3.11
-        COPY --from=builder /usr/local/lib/python3.11/site-packages /var/lang/lib/python3.11/site-packages
-        COPY --from=builder /root/.cache/huggingface /root/.cache/huggingface
         COPY handler.py ${LAMBDA_TASK_ROOT}/lambda_handler.py
         CMD ["lambda_handler.handler"]
         DEOF
@@ -57,6 +64,11 @@ phases:
         import json, boto3, base64, os, uuid
         from datetime import datetime
         from io import BytesIO
+
+        # Set cache directories to /tmp (Lambda writable)
+        os.environ['TRANSFORMERS_CACHE'] = '/tmp/transformers'
+        os.environ['HF_HOME'] = '/tmp/hf'
+
         s3 = boto3.client("s3")
         BUCKET = os.environ.get("BUCKET_NAME", "coffee-qm-images")
         MODEL = "everycoffee/autotrain-coffee-bean-quality-97496146930"

@@ -26,9 +26,11 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       login: async (email: string, password: string) => {
-        const res = await api.post<{ access_token: string; user_id: string }>('/auth/login', { email, password });
-        api.setToken(res.access_token);
-        set({ token: res.access_token, isAuthenticated: true, user: { id: res.user_id, name: '', email, business_id: '' } });
+        // Mock login for demo - accepts any email/password
+        const mockToken = 'demo-token-' + Date.now();
+        const mockUser = { id: 'demo-user', name: email.split('@')[0], email, business_id: 'demo-business' };
+        api.setToken(mockToken);
+        set({ token: mockToken, isAuthenticated: true, user: mockUser });
       },
 
       logout: () => {

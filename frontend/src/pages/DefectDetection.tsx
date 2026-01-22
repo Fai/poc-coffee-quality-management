@@ -1,16 +1,35 @@
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Camera, Upload, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Camera, Upload, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { defectApi, DefectDetectionResult } from '../services/api';
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000;
 
 export default function DefectDetection() {
   const { t } = useTranslation();
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState('');
   const [result, setResult] = useState<DefectDetectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const detectWithRetry = async (base64: string, attempt = 1): Promise<DefectDetectionResult> => {
+    try {
+      setLoadingMsg(attempt > 1 ? t('defect.retrying', { attempt }) : t('defect.analyzing'));
+      return await defectApi.detect(base64);
+    } catch (err) {
+      const isTimeout = err instanceof Error && (err.message.includes('timeout') || err.message.includes('Internal Server Error'));
+      if (isTimeout && attempt < MAX_RETRIES) {
+        setLoadingMsg(t('defect.coldStart'));
+        await new Promise(r => setTimeout(r, RETRY_DELAY));
+        return detectWithRetry(base64, attempt + 1);
+      }
+      throw err;
+    }
+  };
 
   const handleFile = async (file: File) => {
     setError(null);
@@ -23,12 +42,13 @@ export default function DefectDetection() {
       
       setLoading(true);
       try {
-        const res = await defectApi.detect(base64);
+        const res = await detectWithRetry(base64);
         setResult(res);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Detection failed');
       } finally {
         setLoading(false);
+        setLoadingMsg('');
       }
     };
     reader.readAsDataURL(file);
@@ -75,16 +95,25 @@ export default function DefectDetection() {
           <img src={image} alt="Sample" className="w-full rounded-xl shadow-lg" />
           
           {loading && (
-            <div className="flex items-center justify-center p-6 bg-coffee-50 rounded-xl">
-              <Loader2 className="w-8 h-8 text-coffee-600 animate-spin mr-3" />
-              <span className="text-coffee-700">{t('defect.analyzing')}</span>
+            <div className="flex flex-col items-center justify-center p-6 bg-coffee-50 rounded-xl">
+              <Loader2 className="w-10 h-10 text-coffee-600 animate-spin mb-3" />
+              <span className="text-coffee-700 font-medium">{loadingMsg}</span>
+              <span className="text-coffee-500 text-sm mt-1">{t('defect.pleaseWait')}</span>
             </div>
           )}
 
           {error && (
-            <div className="flex items-center p-4 bg-red-50 rounded-xl text-red-700">
-              <AlertCircle className="w-6 h-6 mr-2" />
-              {error}
+            <div className="p-4 bg-red-50 rounded-xl">
+              <div className="flex items-center text-red-700 mb-2">
+                <AlertCircle className="w-5 h-5 mr-2" />
+                <span className="font-medium">{error}</span>
+              </div>
+              <button 
+                onClick={() => image && handleFile(new File([fetch(image).then(r => r.blob()) as unknown as BlobPart], 'retry.jpg'))}
+                className="flex items-center text-sm text-red-600 hover:text-red-800"
+              >
+                <RefreshCw className="w-4 h-4 mr-1" /> {t('defect.tryAgain')}
+              </button>
             </div>
           )}
 
@@ -114,14 +143,8 @@ export default function DefectDetection() {
                 </div>
               </div>
 
-              <div className="p-4 bg-amber-50 rounded-lg">
-                <p className="text-sm text-amber-700">
-                  <strong>Note:</strong> {result.detection.note}
-                </p>
-              </div>
-
               <p className="text-xs text-coffee-400">
-                Model: {result.detection.model} | Time: {result.detection.processing_time_ms}ms
+                {t('defect.processTime')}: {result.detection.processing_time_ms}ms
               </p>
             </div>
           )}
