@@ -6,6 +6,18 @@ import { defectApi, DefectDetectionResult } from '../services/api';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000;
 
+const DEFECT_COLORS: Record<string, string> = {
+  black: 'bg-gray-800 text-white',
+  broken: 'bg-amber-600 text-white',
+  foreign: 'bg-purple-600 text-white',
+  fraghusk: 'bg-yellow-500 text-black',
+  green: 'bg-green-600 text-white',
+  husk: 'bg-orange-500 text-white',
+  immature: 'bg-lime-500 text-black',
+  infested: 'bg-red-700 text-white',
+  sour: 'bg-pink-500 text-white',
+};
+
 export default function DefectDetection() {
   const { t } = useTranslation();
   const [image, setImage] = useState<string | null>(null);
@@ -13,13 +25,14 @@ export default function DefectDetection() {
   const [loadingMsg, setLoadingMsg] = useState('');
   const [result, setResult] = useState<DefectDetectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [useYolo, setUseYolo] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const detectWithRetry = async (base64: string, attempt = 1): Promise<DefectDetectionResult> => {
     try {
       setLoadingMsg(attempt > 1 ? t('defect.retrying', { attempt }) : t('defect.analyzing'));
-      return await defectApi.detect(base64);
+      return useYolo ? await defectApi.detectYolo(base64) : await defectApi.detect(base64);
     } catch (err) {
       const isTimeout = err instanceof Error && (err.message.includes('timeout') || err.message.includes('Internal Server Error'));
       if (isTimeout && attempt < MAX_RETRIES) {
@@ -65,9 +78,19 @@ export default function DefectDetection() {
     setError(null);
   };
 
+  const isYoloResult = result?.detection.total_defects !== undefined;
+  const totalDefects = result?.detection.total_defects ?? 0;
+  const defectCounts = result?.detection.defect_counts ?? {};
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-coffee-800">{t('defect.title')}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-coffee-800">{t('defect.title')}</h1>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={useYolo} onChange={e => setUseYolo(e.target.checked)} className="rounded" />
+          <span className="text-coffee-600">{t('defect.countMode')}</span>
+        </label>
+      </div>
 
       {!image ? (
         <div className="grid grid-cols-2 gap-4">
@@ -108,10 +131,7 @@ export default function DefectDetection() {
                 <AlertCircle className="w-5 h-5 mr-2" />
                 <span className="font-medium">{error}</span>
               </div>
-              <button 
-                onClick={() => image && handleFile(new File([fetch(image).then(r => r.blob()) as unknown as BlobPart], 'retry.jpg'))}
-                className="flex items-center text-sm text-red-600 hover:text-red-800"
-              >
+              <button onClick={reset} className="flex items-center text-sm text-red-600 hover:text-red-800">
                 <RefreshCw className="w-4 h-4 mr-1" /> {t('defect.tryAgain')}
               </button>
             </div>
@@ -122,29 +142,52 @@ export default function DefectDetection() {
               <div className="flex items-center justify-between">
                 <h2 className="font-semibold text-coffee-700">{t('defect.result')}</h2>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  result.detection.is_defective 
+                  (isYoloResult ? totalDefects > 0 : result.detection.is_defective)
                     ? 'bg-red-100 text-red-700' 
                     : 'bg-green-100 text-green-700'
                 }`}>
-                  {result.detection.is_defective ? t('defect.hasDefect') : t('defect.noDefect')}
+                  {isYoloResult 
+                    ? (totalDefects > 0 ? t('defect.defectsFound', { count: totalDefects }) : t('defect.noDefect'))
+                    : (result.detection.is_defective ? t('defect.hasDefect') : t('defect.noDefect'))
+                  }
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-coffee-50 rounded-lg">
-                  <p className="text-sm text-coffee-500">{t('defect.confidence')}</p>
-                  <p className="text-2xl font-bold text-coffee-800">
-                    {(result.detection.confidence_score * 100).toFixed(1)}%
-                  </p>
+              {isYoloResult && Object.keys(defectCounts).length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-coffee-500 font-medium">{t('defect.defectBreakdown')}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(defectCounts).map(([type, count]) => (
+                      <span key={type} className={`px-3 py-1 rounded-full text-sm font-medium ${DEFECT_COLORS[type] || 'bg-gray-200'}`}>
+                        {t(`defect.types.${type}`, type)}: {count}
+                      </span>
+                    ))}
+                  </div>
                 </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                {isYoloResult ? (
+                  <div className="p-4 bg-coffee-50 rounded-lg">
+                    <p className="text-sm text-coffee-500">{t('defect.totalDefects')}</p>
+                    <p className="text-2xl font-bold text-coffee-800">{totalDefects}</p>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-coffee-50 rounded-lg">
+                    <p className="text-sm text-coffee-500">{t('defect.confidence')}</p>
+                    <p className="text-2xl font-bold text-coffee-800">
+                      {((result.detection.confidence_score ?? 0) * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                )}
                 <div className="p-4 bg-coffee-50 rounded-lg">
                   <p className="text-sm text-coffee-500">{t('defect.grade')}</p>
-                  <p className="text-2xl font-bold text-coffee-800">{result.suggested_grade}</p>
+                  <p className="text-2xl font-bold text-coffee-800">{t(`defect.grades.${result.suggested_grade}`, result.suggested_grade)}</p>
                 </div>
               </div>
 
               <p className="text-xs text-coffee-400">
-                {t('defect.processTime')}: {result.detection.processing_time_ms}ms
+                {t('defect.processTime')}: {result.detection.processing_time_ms}ms • {result.detection.model}
               </p>
             </div>
           )}

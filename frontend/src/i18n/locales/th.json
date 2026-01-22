@@ -74,11 +74,34 @@
     "result": "ผลการตรวจ",
     "hasDefect": "พบข้อบกพร่อง",
     "noDefect": "ไม่พบข้อบกพร่อง",
+    "defectsFound": "พบข้อบกพร่อง {{count}} จุด",
+    "defectBreakdown": "รายละเอียดข้อบกพร่อง",
+    "totalDefects": "ข้อบกพร่องทั้งหมด",
+    "countMode": "นับข้อบกพร่อง",
     "confidence": "ความมั่นใจ",
     "grade": "เกรดแนะนำ",
     "scanAnother": "สแกนใหม่",
     "tryAgain": "ลองอีกครั้ง",
-    "processTime": "เวลาประมวลผล"
+    "processTime": "เวลาประมวลผล",
+    "types": {
+      "black": "ดำ",
+      "broken": "แตก",
+      "foreign": "สิ่งแปลกปลอม",
+      "fraghusk": "เศษกะลา",
+      "green": "ดิบ",
+      "husk": "กะลา",
+      "immature": "ไม่สุก",
+      "infested": "มีแมลง",
+      "sour": "เปรี้ยว"
+    },
+    "grades": {
+      "specialty": "สเปเชียลตี้",
+      "premium": "พรีเมียม",
+      "commercial": "เชิงพาณิชย์",
+      "below_grade": "ต่ำกว่าเกรด",
+      "needs_inspection": "ต้องตรวจสอบ",
+      "likely_specialty": "น่าจะเป็นสเปเชียลตี้"
+    }
   },
   "inventory": {
     "title": "สินค้าคงคลัง",

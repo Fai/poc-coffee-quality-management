@@ -95,22 +95,27 @@ export const inventoryApi = {
   getSummary: () => api.get('/inventory/summary'),
 };
 
-// AI Defect Detection
+// AI Defect Detection - supports both binary classification and YOLO object detection
 export interface DefectDetectionResult {
   request_id: string;
   detection: {
-    request_id: string;
-    image_url: string;
-    is_defective: boolean;
-    defect_probability: number;
-    confidence_score: number;
+    // Binary classification (old model)
+    is_defective?: boolean;
+    defect_probability?: number;
+    confidence_score?: number;
+    // YOLO object detection (new model)
+    total_defects?: number;
+    defect_counts?: Record<string, number>;
+    detections?: Array<{ class: string; confidence: number; bbox: number[] }>;
+    // Common
     processing_time_ms: number;
     model: string;
-    note: string;
+    note?: string;
   };
   suggested_grade: string;
 }
 
 export const defectApi = {
   detect: (imageBase64: string) => aiApi.post<DefectDetectionResult>('/detect', { image_base64: imageBase64 }),
+  detectYolo: (imageBase64: string) => aiApi.post<DefectDetectionResult>('/yolo', { image_base64: imageBase64 }),
 };

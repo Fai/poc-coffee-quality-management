@@ -74,11 +74,34 @@
     "result": "Detection Result",
     "hasDefect": "Defect Found",
     "noDefect": "No Defect",
+    "defectsFound": "{{count}} Defects Found",
+    "defectBreakdown": "Defect Breakdown",
+    "totalDefects": "Total Defects",
+    "countMode": "Count defects",
     "confidence": "Confidence",
     "grade": "Suggested Grade",
     "scanAnother": "Scan Another",
     "tryAgain": "Try Again",
-    "processTime": "Process time"
+    "processTime": "Process time",
+    "types": {
+      "black": "Black",
+      "broken": "Broken",
+      "foreign": "Foreign",
+      "fraghusk": "Fragment/Husk",
+      "green": "Green",
+      "husk": "Husk",
+      "immature": "Immature",
+      "infested": "Infested",
+      "sour": "Sour"
+    },
+    "grades": {
+      "specialty": "Specialty",
+      "premium": "Premium",
+      "commercial": "Commercial",
+      "below_grade": "Below Grade",
+      "needs_inspection": "Needs Inspection",
+      "likely_specialty": "Likely Specialty"
+    }
   },
   "inventory": {
     "title": "Inventory",
